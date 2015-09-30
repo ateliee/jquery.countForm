@@ -13,12 +13,17 @@ bootstrap addon support.
     (function(){
         $('input').countForm({
             byte : false,   // 2 byte chanracter count
-            addon: true,    // bootstrap addon or element after <div class="count"> 
+            byteToValue : 0.5,   // 2 byte chanracter count value
+            addon: true,    // bootstrap addon or element after <div class="count">
             before : '',
             separator : ' / ',
             after : '',
-            show_max: true,     // show str (before + [count] + separator + [maxlength] + after) or (before + [count] + after)
-            maxlength: null     // if not maxlength option then input[maxlength] value get
+            showMax: true,     // show str (before + [count] + separator + [maxlength] + after) or (before + [count] + after)
+            maxlength : null,     // if not maxlength option then input[maxlength] value get
+            countUp : true,         // if count up or count down
+            overClass : '',
+            defaultClass : '',
+            emptyClass : '',
         });
     }($));
 </script>

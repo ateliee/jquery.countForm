@@ -7,13 +7,18 @@
     $.fn.countForm = function(options){
         var $this = $(this);
         var settings = {
-            byte : false,
-            addon: true,    // bootstrap addon
+            byte : false,   // 2 byte chanracter count
+            byteToValue : 0.5,   // 2 byte chanracter count value
+            addon: true,    // bootstrap addon or element after <div class="count">
             before : '',
             separator : ' / ',
             after : '',
-            show_max: true,
-            maxlength : null,
+            showMax: true,     // show str (before + [count] + separator + [maxlength] + after) or (before + [count] + after)
+            maxlength : null,     // if not maxlength option then input[maxlength] value get
+            countUp : true,         // if count up or count down
+            overClass : '',
+            defaultClass : '',
+            emptyClass : '',
             debug: false
         };
         settings = $.extend(settings,options);
@@ -43,9 +48,9 @@
             // Shift_JIS: 0x0 ～ 0x80, 0xa0 , 0xa1 ～ 0xdf , 0xfd ～ 0xff
             // Unicode : 0x0 ～ 0x80, 0xf8f0, 0xff61 ～ 0xff9f, 0xf8f1 ～ 0xf8f3
             if ( (c >= 0x0 && c < 0x81) || (c == 0xf8f0) || (c >= 0xff61 && c < 0xffa0) || (c >= 0xf8f1 && c < 0xf8f4)) {
-                return 1;
+                return $this.settings.byteToValue;
             }
-            return 2;
+            return ($this.settings.byteToValue * 2);
         }
         $this.subStr = function(str,length){
             var s = '';
@@ -59,28 +64,54 @@
             }
             return s;
         };
+        $this.setClassCount = function(class_name){
+            var $count = $(this).next('.count');
+            var classes = [];
+            if($this.settings.overClass){
+                classes.push($this.settings.overClass);
+            }
+            if($this.settings.defaultClass){
+                classes.push($this.settings.defaultClass);
+            }
+            if($this.settings.emptyClass){
+                classes.push($this.settings.emptyClass);
+            }
+            for(var i in classes){
+                if($count.hasClass(classes[i])){
+                    $count.removeClass(classes[i]);
+                }
+            }
+            if(class_name){
+                $count.addClass(class_name);
+            }
+        };
 
         $this.bind('keydown keyup keypress change',function(){
             var countMax = $this.settings.maxlength;
-            var val = $this.subStr($(this).val(),countMax);
-            $(this).val(val);
+            var v = $(this).val();
+            var val = $this.subStr(v,countMax);
+            if(v != val){
+                $(this).val(val);
+            }
 
             var thisValueLength = $this.countStr(val);
-            var countDown = (countMax)-(thisValueLength);
+            var countValue = ($this.settings.countUp ? thisValueLength : ((countMax)-(thisValueLength)));
             var $count = $(this).next('.count');
 
-            var text = $this.settings.before + countDown;
-            if($this.settings.show_max){
+            var text = $this.settings.before + countValue;
+            if($this.settings.showMax){
                 text += $this.settings.separator + countMax;
             }
             text += $this.settings.after;
 
             $count.html(text);
 
-            if(countDown < 0){
-                $count.css({color:'#ff0000',fontWeight:'bold'});
+            if(thisValueLength >= countMax) {
+                $this.setClassCount($this.settings.overClass);
+            }else if (thisValueLength <= 0){
+                $this.setClassCount($this.settings.emptyClass);
             } else {
-                $count.css({color:'#000000',fontWeight:'normal'});
+                $this.setClassCount($this.settings.defaultClass);
             }
         });
 
@@ -94,6 +125,7 @@
             }else{
                 $this.after('<div class="count"></div>');
             }
+            $this.removeAttr('maxlength');
             $this.trigger('change');
         };
         $this.init();
