@@ -1,6 +1,6 @@
 
 # jquery count form
-![](https://raw.githubusercontent.com/wiki/ateliee/jquery.countForm/doc/images/screenshot.png)
+![](/doc/images/screenshot.png)
 
 ## Description
 input str count form show.
